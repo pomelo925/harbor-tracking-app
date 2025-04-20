@@ -41,8 +41,8 @@ Dataset total capacity: XX GB.
     - (9.8K)[Ships Computer Vision Project](https://universe.roboflow.com/workspace-eabjt/ships-zp234)
 
 * pedestrians:
-    - (76)[Test1 Computer Vision Project](https://universe.roboflow.com/test-qsxsp/test1-ybftl)
-    - (1688)[Human Detection Computer Vision Project](https://universe.roboflow.com/humandetectionv2/human-detection-w3rnj)
+    - (3K)[person_detection Computer Vision Project](https://universe.roboflow.com/pavan-kalyan-o41rw/person_detection-vak5r)
+    - (1.6K)[Human Detection Computer Vision Project](https://universe.roboflow.com/humandetectionv2/human-detection-w3rnj)
 
 * vehicles:
     - (4.4K)[cars Computer Vision Project](https://universe.roboflow.com/sas-qehgd/cars-qtxnb)

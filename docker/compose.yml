@@ -13,8 +13,8 @@ x-common-settings: &common
     - /tmp/.X11-unix:/tmp/.X11-unix
 
     # shared datasets and workspace
-    - ./shared/datasets:/datasets
-    - ./shared/workspace:/workspace
+    - ../datasets:/ultralytics/datasets
+    - ../pretrain-weights:/ultralytics/pretrain-weights
 
   environment:
     - DISPLAY=${DISPLAY}
@@ -27,11 +27,19 @@ x-common-settings: &common
   ipc: host
   privileged: true
   stop_grace_period: 1s
+
+
+############################
+###   shared settings    ###
+############################
+x-gpu-settings: &gpu
   deploy:
     resources:
       reservations:
         devices:
-          - capabilities: [gpu]
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
 
 
 ##############################
@@ -39,7 +47,6 @@ x-common-settings: &common
 ##############################
 services:
   yolo:
-    <<: *common
+    <<: [*common, *gpu]
     container_name: yolo-dev
     command: [ "bash" ]
-    runtime: nvidia

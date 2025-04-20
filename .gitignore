@@ -1,3 +1,4 @@
 .vscode
 
-/dataset
+# datasets
+*.yolov12
