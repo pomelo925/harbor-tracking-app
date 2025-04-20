@@ -1,0 +1,45 @@
+#############################
+###    shared settings    ###
+#############################
+x-common-settings: &common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: ultralytics/ultralytics:latest
+
+  volumes:
+    # GUI (optional, for QT-based windows)
+    - $HOME/.Xauthority:/root/.Xauthority
+    - /tmp/.X11-unix:/tmp/.X11-unix
+
+    # shared datasets and workspace
+    - ./shared/datasets:/datasets
+    - ./shared/workspace:/workspace
+
+  environment:
+    - DISPLAY=${DISPLAY}
+    - QT_DEBUG_PLUGINS=1  # Optional for QT window debugging
+    - PYTHONUNBUFFERED=1
+    - PYTHONDONTWRITEBYTECODE=1
+
+  tty: true
+  stdin_open: true
+  ipc: host
+  privileged: true
+  stop_grace_period: 1s
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - capabilities: [gpu]
+
+
+##############################
+###   Container Services   ###
+##############################
+services:
+  yolo:
+    <<: *common
+    container_name: yolo-dev
+    command: [ "bash" ]
+    runtime: nvidia
