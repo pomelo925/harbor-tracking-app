@@ -1,4 +1,8 @@
 .vscode
 
 # datasets
+datasets/
 *.yolov12
+
+# model
+runs/

@@ -5,7 +5,7 @@ x-common-settings: &common
   build:
     context: .
     dockerfile: Dockerfile
-  image: ultralytics/ultralytics:latest
+  image: pomelo925/ml-app:final
 
   volumes:
     # GUI (optional, for QT-based windows)
@@ -13,14 +13,12 @@ x-common-settings: &common
     - /tmp/.X11-unix:/tmp/.X11-unix
 
     # shared datasets and workspace
-    - ../datasets:/ultralytics/datasets
+    - ../datasets:/home/datasets
+    - ../yolov12-ws:/home/yolov12-ws
     - ../pretrain-weights:/ultralytics/pretrain-weights
 
   environment:
     - DISPLAY=${DISPLAY}
-    - QT_DEBUG_PLUGINS=1  # Optional for QT window debugging
-    - PYTHONUNBUFFERED=1
-    - PYTHONDONTWRITEBYTECODE=1
 
   tty: true
   stdin_open: true
@@ -46,7 +44,7 @@ x-gpu-settings: &gpu
 ###   Container Services   ###
 ##############################
 services:
-  yolo:
+  dev:
     <<: [*common, *gpu]
     container_name: yolo-dev
     command: [ "bash" ]
