@@ -70,3 +70,14 @@ RUN pip install --no-cache-dir \
         fastapi \
         uvicorn[standard] \
         pillow
+
+
+################################################################################################
+# release stage
+# - Final stage for the Harbor Tracking App, ready for deployment.
+################################################################################################
+FROM online-deployment AS release
+
+WORKDIR /home/yolov12-ws
+
+USER appuser
