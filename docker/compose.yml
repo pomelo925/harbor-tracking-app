@@ -64,4 +64,4 @@ services:
   demo:
     <<: [*common, *gpu, *web]
     container_name: demo
-    command: [ "bash" ]
+    command: [ "bash", "-c", "cd /home/backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000"]
