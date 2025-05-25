@@ -4,23 +4,51 @@
 # 1. 使用者自訂參數區 
 ### ----------------------------- ###
 
+# 原始 YOLO 資料夾的路徑
 FOLDER_PATH=(
-  "/home/datasets/pedestrian-1688.v1i.yolov12"
-  "/home/datasets/vehicle-truck1073-medan4426-bus1000.v1i.yolov12"
+  "/home/datasets/human.yolov12"
+  "/home/datasets/vehicle.yolov12"
+  "/home/datasets/vessel.yolov12"
+  "/home/datasets/bollard.yolov12"
+  "/home/datasets/mooring-rope.yolov12"
+  # "/home/datasets/harbor-objects.yolov12"
 )
 
-MERGED_CLASSES=("human" "vehicle")
+# 合併類別名稱
+MERGED_CLASSES=("human" "vehicle" "vessel" "bollard" "mooring-rope")
 
-MERGE_CLASS_NAME="vehicle-human"
+# 合併後的資料夾名稱
+MERGE_CLASS_NAME="harbor-objects"
+# 合併後的資料夾路徑
 TARGET_DIR="/home/datasets/${MERGE_CLASS_NAME}.yolov12"
+# 合併後的 data.yaml 路徑
 DATA_YAML_PATH="${TARGET_DIR}/data.yaml"
+
+# 顯示類別統計表格
+SHOW_CLASS_TABLE=true
 
 ### ----------------------------- ###
 # 2. 建立資料夾結構與初始化計數器
 ### ----------------------------- ###
 
-echo "🔧 開始合併 YOLO 資料夾..."
-echo "📁 目標資料夾：${TARGET_DIR}"
+# 顏色定義
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+NC='\033[0m' # No Color
+
+echo -e "${CYAN}🔧 Starting YOLO dataset merge...${NC}"
+echo -e "${BLUE}📁 Target directory: ${WHITE}${TARGET_DIR}${NC}"
+
+# 清理並建立目標資料夾
+if [[ -d "$TARGET_DIR" ]]; then
+    echo -e "${YELLOW}⚠️  Target directory exists, cleaning up...${NC}"
+    rm -rf "$TARGET_DIR"
+fi
 
 for SPLIT in train valid test; do
   mkdir -p "${TARGET_DIR}/${SPLIT}/images"
@@ -32,42 +60,115 @@ declare -A CLASS_TOTAL_COUNT
 for cname in "${MERGED_CLASSES[@]}"; do
   CLASS_COUNTER[$cname]=1
   CLASS_TOTAL_COUNT[$cname]=0
-  echo "初始化命名計數器：$cname = 1"
 done
 
 declare -A CLASS_MAPPING  # e.g., ["/folder|vehicle"] = 1
 
 ### ----------------------------- ###
-# 3. 建立 Class Mapping
+# 3. 解析 YAML 的函數
+### ----------------------------- ###
+parse_yaml_names() {
+    local yaml_file="$1"
+    # 使用 python 來解析 YAML（更可靠的方法）
+    if command -v python3 &> /dev/null; then
+        python3 -c "
+import yaml
+import sys
+try:
+    with open('$yaml_file', 'r') as f:
+        data = yaml.safe_load(f)
+    names = data.get('names', [])
+    for i, name in enumerate(names):
+        print(f'{i}:{name}')
+except Exception as e:
+    print(f'ERROR:{e}', file=sys.stderr)
+    exit(1)
+" 2>/dev/null
+    else
+        # 備用方法：使用 awk 解析
+        awk '
+        /^names:/ {
+            in_names = 1
+            # 檢查是否為單行格式 names: [...]
+            if ($0 ~ /\[.*\]/) {
+                # 單行格式
+                match($0, /\[(.*)\]/, arr)
+                names_str = arr[1]
+                gsub(/['\''"]/, "", names_str)  # 移除引號
+                gsub(/[[:space:]]*,[[:space:]]*/, ",", names_str)  # 標準化逗號
+                split(names_str, names_array, ",")
+                for (i in names_array) {
+                    gsub(/^[[:space:]]+|[[:space:]]+$/, "", names_array[i])  # trim
+                    if (names_array[i] != "") {
+                        printf "%d:%s\n", i-1, names_array[i]
+                    }
+                }
+                in_names = 0
+            }
+            next
+        }
+        in_names && /^[[:space:]]*-/ {
+            # 多行格式中的項目
+            gsub(/^[[:space:]]*-[[:space:]]*/, "")  # 移除 "- "
+            gsub(/['\''"]/, "")  # 移除引號
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "")  # trim
+            if ($0 != "") {
+                printf "%d:%s\n", NR_count++, $0
+            }
+        }
+        in_names && !/^[[:space:]]*-/ && !/^[[:space:]]*$/ {
+            # 非清單項目，結束 names 區段
+            in_names = 0
+        }
+        BEGIN { NR_count = 0 }
+        ' "$yaml_file"
+    fi
+}
+
+### ----------------------------- ###
+# 4. 建立 Class Mapping
 ### ----------------------------- ###
 
-echo "📌 建立類別映射 (從 data.yaml 解析)..."
+echo -e "${PURPLE}📌 Building class mapping (parsing from data.yaml)...${NC}"
 for i in "${!FOLDER_PATH[@]}"; do
   SRC="${FOLDER_PATH[$i]}"
   YAML_FILE="$SRC/data.yaml"
   if [[ ! -f "$YAML_FILE" ]]; then
-    echo "❌ 找不到 $YAML_FILE"; exit 1
+    echo -e "${RED}❌ Cannot find $YAML_FILE${NC}"; exit 1
   fi
 
-  for cname in "${MERGED_CLASSES[@]}"; do
-    IDX=$(grep -Po "(?<=names: \[)[^]]*" "$YAML_FILE" | \
-      tr -d "'" | tr ',' '\n' | \
-      awk -v class="$cname" '{gsub(/^\s+|\s+$/, "", $0); if ($0==class) print NR-1}')
-    if [[ "$IDX" == "" ]]; then
-      echo "⚠️ 類別 '$cname' 未在 $SRC 的 data.yaml 中出現，將略過"
-    else
-      CLASS_MAPPING["$SRC|$cname"]="$IDX"
-      echo "✅ 類別 '$cname' 在 $SRC 中的 index = $IDX"
-    fi
-  done
+  echo -e "${CYAN}🔍 Parsing ${WHITE}$YAML_FILE${NC}..."
+  
+  # 解析 YAML 中的 names
+  NAMES_OUTPUT=$(parse_yaml_names "$YAML_FILE")
+  
+  if [[ $? -ne 0 ]] || [[ -z "$NAMES_OUTPUT" ]]; then
+    echo -e "${RED}❌ Failed to parse names field in $YAML_FILE${NC}"
+    exit 1
+  fi
+  
+  # 建立映射
+  while IFS=':' read -r idx class_name; do
+    # 檢查這個類別是否在我們要合併的類別中
+    for target_class in "${MERGED_CLASSES[@]}"; do
+      if [[ "$class_name" == "$target_class" ]]; then
+        CLASS_MAPPING["$SRC|$target_class"]="$idx"
+        echo -e "${GREEN}✅ Class '${WHITE}$target_class${GREEN}' in $SRC has index = ${WHITE}$idx${NC}"
+        break
+      fi
+    done
+  done <<< "$NAMES_OUTPUT"
 done
 
 ### ----------------------------- ###
-# 4. 合併資料與標註轉換（含多行即時刷新）
+# 5. 合併資料與標註轉換（含多行即時刷新）
 ### ----------------------------- ###
 
 SEG_SKIP=0
-LINES=6  # 多行輸出行數（調整為實際行數）
+TABLE_DISPLAYED=false  # 標記表格是否已顯示
+DYNAMIC_LINES=4  # 動態內容行數（文件信息部分）
+
+echo -e "${BLUE}🔄 Starting file merge...${NC}"
 
 for i in "${!FOLDER_PATH[@]}"; do
   SRC="${FOLDER_PATH[$i]}"
@@ -96,20 +197,18 @@ for i in "${!FOLDER_PATH[@]}"; do
           LABEL_PATH="${LABEL_SRC}/${BASE}.txt"
 
           # 多行刷新輸出（先移動游標回上方）
-          tput cuu $LINES
-          tput ed
+          if [[ -t 1 ]]; then  # 只在終端機中使用 tput
+            tput cuu $LINES
+            tput ed
+          fi
 
-          printf -- "🔍 資料夾: %s/%s\n" "$PROJECT_NAME" "$SPLIT"
-          printf -- "📝 檔案: %s\n" "$FILE_NAME"
-          for mc in "${MERGED_CLASSES[@]}"; do
-            printf -- "🔹 類別 '%s' 已轉換數量：%d\n" "$mc" "${CLASS_TOTAL_COUNT[$mc]}"
-          done
-          printf -- "------------------------------\n"
+          printf -- "${CYAN}🔍 FOLDER: ${WHITE}%s/%s${NC}\n" "$PROJECT_NAME" "$SPLIT"
+          printf -- "${BLUE}📝 Source FILENAME: ${WHITE}%s${NC}\n" "$FILE_NAME"
 
           if [[ -f "$LABEL_PATH" ]]; then
             # ➤ 檢查 segmentation（NF > 5）
             if ! awk '{ if (NF > 5) exit 1 }' "$LABEL_PATH"; then
-              echo "⚠️ 偵測到 segmentation 格式：$LABEL_PATH，已跳過"
+              echo -e "${YELLOW}⚠️ Detected segmentation format: ${WHITE}$LABEL_PATH${YELLOW} skipped!${NC}"
               ((SEG_SKIP++))
               continue
             fi
@@ -117,14 +216,29 @@ for i in "${!FOLDER_PATH[@]}"; do
             if grep -q "^$SRC_CLASS_IDX " "$LABEL_PATH"; then
               IDX="${CLASS_COUNTER[$cname]}"
               NEW_NAME="${cname}_${IDX}"
-              cp "$IMG_PATH" "${IMG_DEST}/${NEW_NAME}.jpg"
+              
+              # 複製圖片檔案，保持原始副檔名
+              FILE_EXT="${FILE_NAME##*.}"
+              cp "$IMG_PATH" "${IMG_DEST}/${NEW_NAME}.${FILE_EXT}"
+              
+              # 轉換標籤檔案
               awk -v orig_idx="$SRC_CLASS_IDX" -v new_idx="$MERGE_CLASS_IDX" 'BEGIN{OFS=" "} $1==orig_idx {$1=new_idx} {print}' "$LABEL_PATH" > "${LABEL_DEST}/${NEW_NAME}.txt"
-              echo "✅ $BASE ➜ $NEW_NAME (轉換 $SRC_CLASS_IDX ➜ $MERGE_CLASS_IDX)"
+              
+              printf -- "${GREEN}🎯 Converted FILENAME: ${WHITE}%s.%s${NC}\n" "$NEW_NAME" "$FILE_EXT"
+              printf -- "${PURPLE}📋 Class Mapping: ${WHITE}%s ${PURPLE}➜ ${WHITE}%s${NC}\n" "$SRC_CLASS_IDX" "$MERGE_CLASS_IDX"
               ((CLASS_COUNTER[$cname]++))
               ((CLASS_TOTAL_COUNT[$cname]++))
             fi
           else
-            echo "⚠️ 無對應標註：$LABEL_PATH"
+            echo -e "${YELLOW}⚠️ No corresponding annotation: ${WHITE}$LABEL_PATH${NC}"
+          fi
+
+          printf -- "${WHITE}────────────────────────────────────────${NC}\n"
+          if [[ "$SHOW_CLASS_TABLE" == true ]]; then
+            printf -- "${PURPLE}📊 Classes converted so far:${NC}\n"
+            for mc in "${MERGED_CLASSES[@]}"; do
+              printf -- "${WHITE}- ${YELLOW}%-12s${WHITE}: ${GREEN}%d${NC}\n" "$mc" "${CLASS_TOTAL_COUNT[$mc]}"
+            done
           fi
         done
       fi
@@ -133,31 +247,50 @@ for i in "${!FOLDER_PATH[@]}"; do
 done
 
 ### ----------------------------- ###
-# 5. 產生 data.yaml
-### ----------------------------- ###
-
-echo "📝 產生 data.yaml ..."
-
-cat <<EOF > "$DATA_YAML_PATH"
-train: ../train/images
-val: ../valid/images
-test: ../test/images
-
-nc: ${#MERGED_CLASSES[@]}
-names: [$(printf "'%s', " "${MERGED_CLASSES[@]}" | sed 's/, $//')]
-EOF
-
-echo "✅ 已產生：$DATA_YAML_PATH"
-
-### ----------------------------- ###
-# 6. 結果總結
+# 6. 產生 data.yaml
 ### ----------------------------- ###
 
 echo ""
-echo "📊 結果總結"
-echo "-----------------------------"
-for cname in "${MERGED_CLASSES[@]}"; do
-  echo "🔹 類別 '$cname' 轉換數量：${CLASS_TOTAL_COUNT[$cname]}"
+echo -e "${BLUE}📝 Generating data.yaml...${NC}"
+
+cat <<EOF > "$DATA_YAML_PATH"
+train: train/images
+val: valid/images
+test: test/images
+
+nc: ${#MERGED_CLASSES[@]}
+names: [$(printf "'%s', " "${MERGED_CLASSES[@]}" | sed 's/, $//')]
+
+# Class statistics:
+EOF
+
+for class_name in "${MERGED_CLASSES[@]}"; do
+  echo "# - $class_name: ${CLASS_TOTAL_COUNT[$class_name]} instances" >> "$DATA_YAML_PATH"
 done
-echo "🚫 跳過 segmentation 標註數量：$SEG_SKIP"
-echo "🎉 合併完成！輸出位置：${TARGET_DIR}"
+
+echo -e "${GREEN}✅ data.yaml path: ${WHITE}$DATA_YAML_PATH${NC}"
+
+### ----------------------------- ###
+# 7. 總結報告
+### ----------------------------- ###
+
+echo ""
+echo -e "${GREEN}🎉 Merge completed successfully!${NC}"
+echo -e "${CYAN}📊 Statistics:${NC}"
+echo -e "  ${WHITE}📁 Target directory: ${BLUE}$TARGET_DIR${NC}"
+echo -e "  ${WHITE}🏷️  Merged classes: ${PURPLE}${#MERGED_CLASSES[@]}${NC}"
+
+total_instances=0
+for class_name in "${MERGED_CLASSES[@]}"; do
+  count=${CLASS_TOTAL_COUNT[$class_name]}
+  echo -e "    ${YELLOW}- ${WHITE}$class_name${YELLOW}: ${GREEN}$count${YELLOW} instances${NC}"
+  total_instances=$((total_instances + count))
+done
+
+echo -e "  ${WHITE}📈 Total instances: ${GREEN}$total_instances${NC}"
+if [[ $SEG_SKIP -gt 0 ]]; then
+  echo -e "  ${YELLOW}⚠️  Skipped segmentation files: ${RED}$SEG_SKIP${NC}"
+fi
+echo -e "  ${WHITE}📄 Config file: ${BLUE}$DATA_YAML_PATH${NC}"
+echo ""
+echo -e "${GREEN}✅ Dataset merge successful! Ready for training.${NC}"

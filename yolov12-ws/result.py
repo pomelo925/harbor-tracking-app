@@ -5,16 +5,16 @@ from ultralytics import YOLO
 # -----------------------------
 
 # 欲使用的模型權重（.pt）
-MODEL_WEIGHT_PATH = '/ultralytics/pretrain-weights/yolov12s.pt'
+MODEL_WEIGHT_PATH = '/home/yolov12-ws/runs/detect/train15/weights/best.pt'
 
 # 驗證或推論用的圖片路徑
-TEST_IMAGE_PATH = '/home/datasets/vehicle-human.yolov12/human_2586.jpg'
+TEST_IMAGE_PATH = '/home/datasets/vehicle-human.yolov12/valid/images/vehicle_14386.jpg'
 
 # 顯示物件框的置信度門檻
 CONFIDENCE_THRESHOLD = 0.5
 
 # 推論使用的設備
-DEVICE = "0"
+DEVICE = "cuda:0"
 
 
 # -----------------------------

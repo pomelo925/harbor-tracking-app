@@ -5,16 +5,13 @@ from ultralytics import YOLO
 # -----------------------------
 
 # 欲使用的模型權重（.pt）
-MODEL_WEIGHT_PATH = '/ultralytics/pretrain-weights/yolov12s.pt'
+MODEL_WEIGHT_PATH = '/ultralytics/pretrain-weights/yolov12m.pt'
 
 # 資料集配置檔（data.yaml）
-DATA_YAML_PATH = '/home/datasets/vehicle-human.yolov12/data.yaml'
-
-# 驗證或推論用的圖片路徑
-TEST_IMAGE_PATH = '/home/datasets/human_4025.jpg'
+DATA_YAML_PATH = '/home/datasets/harbor-objects.yolov12/data.yaml'
 
 # 訓練超參數
-EPOCHS = 50
+EPOCHS = 60
 BATCH_SIZE = 16
 IMAGE_SIZE = 640
 SCALE = 0.9         # S:0.9; M:0.9; L:0.9; X:0.9
