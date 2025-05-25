@@ -58,10 +58,10 @@ x-web-settings: &web
 services:
   dev:
     <<: [*common, *gpu, *web]
-    container_name: yolo-dev
+    container_name: dev
     command: [ "bash" ]
   
-  temp:
+  demo:
     <<: [*common, *gpu, *web]
-    container_name: yolo-temp
+    container_name: demo
     command: [ "bash" ]
