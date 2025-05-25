@@ -13,11 +13,10 @@ x-common-settings: &common
     - /tmp/.X11-unix:/tmp/.X11-unix
 
     # shared files
-    - ../datasets:/home/datasets
     - ../yolov12-ws:/home/yolov12-ws
     - ../pretrain-weights:/ultralytics/pretrain-weights
     - ../frontend:/home/frontend
-    - ./backend:/home/backend
+    - ../backend:/home/backend
 
   environment:
     - DISPLAY=${DISPLAY}
@@ -49,6 +48,7 @@ x-gpu-settings: &gpu
 x-web-settings: &web
   ports:
     - "3000:3000"
+    - "8000:8000"
 
 
 

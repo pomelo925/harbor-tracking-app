@@ -10,3 +10,6 @@ runs/
 # dependencies
 node_modules/
 .next
+
+# build
+__pycache__/
