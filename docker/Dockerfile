@@ -47,6 +47,8 @@ RUN apt-get update && \
         curl \
         htop \
         libpython3-dev \
+        libgl1 \
+        libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /home
@@ -61,10 +63,10 @@ RUN git clone https://github.com/sunsmarterjie/yolov12.git && \
 
 
 ################################################################################################
-# online deployment stage
-# - Sets up the environment for online deployment of the Harbor Tracking App.
+# fastAPI stage
+# - Sets up the environment for the backend of the Harbor Tracking App.
 ################################################################################################
-FROM ultralytics AS online-deployment
+FROM ultralytics AS fastapi
 
 RUN pip install --no-cache-dir \
         fastapi \
@@ -72,11 +74,29 @@ RUN pip install --no-cache-dir \
         pillow
 
 
+
+################################################################################################
+# nextjs stage
+# - Sets up the environment for the frontend of the Harbor Tracking App.
+################################################################################################
+FROM fastapi AS nextjs
+
+RUN apt-get update && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash - && \
+    apt-get install -y \
+        nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN npm i -g \
+        npm@11.4.1 \
+        yarn
+
+
 ################################################################################################
 # release stage
 # - Final stage for the Harbor Tracking App, ready for deployment.
 ################################################################################################
-FROM online-deployment AS release
+FROM nextjs AS release
 
 WORKDIR /home/yolov12-ws
 

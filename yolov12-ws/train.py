@@ -5,7 +5,7 @@ from ultralytics import YOLO
 # -----------------------------
 
 # 欲使用的模型權重（.pt）
-MODEL_WEIGHT_PATH = '/ultralytics/pretrain-weights/yolov12m.pt'
+MODEL_WEIGHT_PATH = '/ultralytics/pretrain-weights/yolov12s.pt'
 
 # 資料集配置檔（data.yaml）
 DATA_YAML_PATH = '/home/datasets/harbor-objects.yolov12/data.yaml'
@@ -16,8 +16,8 @@ BATCH_SIZE = 16
 IMAGE_SIZE = 640
 SCALE = 0.9         # S:0.9; M:0.9; L:0.9; X:0.9
 MOSAIC = 1.0
-MIXUP = 0.15       # S:0.05; M:0.15; L:0.15; X:0.2
-COPY_PASTE = 0.4   # S:0.15; M:0.4; L:0.5; X:0.6
+MIXUP = 0.05       # S:0.05; M:0.15; L:0.15; X:0.2
+COPY_PASTE = 0.15   # S:0.15; M:0.4; L:0.5; X:0.6
 DEVICE = "0"
 
 

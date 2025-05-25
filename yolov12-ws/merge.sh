@@ -6,12 +6,11 @@
 
 # 原始 YOLO 資料夾的路徑
 FOLDER_PATH=(
-  "/home/datasets/human.yolov12"
-  "/home/datasets/vehicle.yolov12"
-  "/home/datasets/vessel.yolov12"
-  "/home/datasets/bollard.yolov12"
-  "/home/datasets/mooring-rope.yolov12"
-  # "/home/datasets/harbor-objects.yolov12"
+  "/home/yolov12-ws/datasets/human.yolov12"
+  "/home/yolov12-ws/datasets/vehicle.yolov12"
+  "/home/yolov12-ws/datasets/vessel.yolov12"
+  "/home/yolov12-ws/datasets/bollard.yolov12"
+  "/home/yolov12-ws/datasets/mooring-rope.yolov12"
 )
 
 # 合併類別名稱
@@ -20,7 +19,7 @@ MERGED_CLASSES=("human" "vehicle" "vessel" "bollard" "mooring-rope")
 # 合併後的資料夾名稱
 MERGE_CLASS_NAME="harbor-objects"
 # 合併後的資料夾路徑
-TARGET_DIR="/home/datasets/${MERGE_CLASS_NAME}.yolov12"
+TARGET_DIR="/home/yolov12-ws/datasets/${MERGE_CLASS_NAME}.yolov12"
 # 合併後的 data.yaml 路徑
 DATA_YAML_PATH="${TARGET_DIR}/data.yaml"
 

@@ -12,10 +12,12 @@ x-common-settings: &common
     - $HOME/.Xauthority:/root/.Xauthority
     - /tmp/.X11-unix:/tmp/.X11-unix
 
-    # shared datasets and workspace
+    # shared files
     - ../datasets:/home/datasets
     - ../yolov12-ws:/home/yolov12-ws
     - ../pretrain-weights:/ultralytics/pretrain-weights
+    - ../frontend:/home/frontend
+    - ./backend:/home/backend
 
   environment:
     - DISPLAY=${DISPLAY}
@@ -40,11 +42,26 @@ x-gpu-settings: &gpu
             capabilities: [gpu]
 
 
+
+############################
+###   shared settings    ###
+############################
+x-web-settings: &web
+  ports:
+    - "3000:3000"
+
+
+
 ##############################
 ###   Container Services   ###
 ##############################
 services:
   dev:
-    <<: [*common, *gpu]
+    <<: [*common, *gpu, *web]
     container_name: yolo-dev
+    command: [ "bash" ]
+  
+  temp:
+    <<: [*common, *gpu, *web]
+    container_name: yolo-temp
     command: [ "bash" ]
