@@ -37,11 +37,11 @@ export default function Home() {
   }
 
   return (
-    <main className="font-sans flex flex-col h-screen bg-[#0f0f0f] text-[#fefefe] overflow-hidden pt-6">
+    <main className="font-sans flex flex-col h-screen bg-[#1f2544] text-[#fefefe] overflow-hidden pt-6">
       {/* Header */}
       <header className="flex justify-center items-center shrink-0">
         <Image src="/logo.svg" alt="Logo" width={100} height={100} />
-        <h1 className="text-4xl font-bold text-[#ff0eff] ml-6 mr-6">Harbor Tracking App</h1>
+        <h1 className="text-4xl font-bold text-[#ffd0ec] ml-6 mr-6">Harbor Tracking App</h1>
         <Image src="/logo.svg" alt="Logo" width={100} height={100} />
       </header>
 

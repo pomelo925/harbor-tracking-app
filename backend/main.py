@@ -16,7 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-predictor = Predictor("/home/yolov12-ws/runs/detect/train2/weights/best.pt")
+predictor = Predictor("/home/yolov12-ws/best.pt")
 
 @app.post("/predict/image")
 async def predict_image(

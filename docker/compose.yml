@@ -42,26 +42,28 @@ x-gpu-settings: &gpu
 
 
 
-############################
-###   shared settings    ###
-############################
-x-web-settings: &web
-  ports:
-    - "3000:3000"
-    - "8000:8000"
-
-
-
 ##############################
 ###   Container Services   ###
 ##############################
 services:
   dev:
-    <<: [*common, *gpu, *web]
+    <<: [*common, *gpu]
     container_name: dev
+    ports:
+      - "3000:3000"
+      - "8000:8000"
     command: [ "bash" ]
   
-  demo:
-    <<: [*common, *gpu, *web]
-    container_name: demo
+  backend:
+    <<: [*common, *gpu]
+    container_name: backend
+    ports:
+      - "8000:8000"
     command: [ "bash", "-c", "cd /home/backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000"]
+
+  frontend:
+    <<: [*common, *gpu]
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    command: [ "bash", "-c", "cd /home/frontend && npm start"]
