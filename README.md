@@ -5,19 +5,20 @@
 ![](/assets/demo.gif)
 
 ## Usage
+Make sure you have installed Docker on Linux or Docker Desktop on Windows.
 
 1. Clone this repo.
 
-```git
-git clone https://github.com/pomelo925/harbor-tracking-app.git
-```
+    ```git
+    git clone https://github.com/pomelo925/harbor-tracking-app.git
+    ```
 
 
 2. Launch docker container.
 
-```
-./run.sh
-```
+    ```
+    ./run.sh
+    ```
 
 ## Folder Hierarchy
 
