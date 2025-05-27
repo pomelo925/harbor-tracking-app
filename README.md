@@ -48,6 +48,7 @@ Due to the free limit capacity of Roboflow, we work around the issue by creating
 3. Re-classify the class name of the merged project.
 4. Download datasets as .zip to local and unzip them.
 5. Locally merge them by `yolov12-ws/merge.sh`.
+
     ![alt text](/assets/local_merge.png)
 
 
