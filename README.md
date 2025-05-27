@@ -2,7 +2,7 @@
 
 2025 Spring NTHU Machine Learning Course Final Project.
 
-![](assets/demo_.gif)
+![](/assets/demo.gif)
 
 ## Usage
 
