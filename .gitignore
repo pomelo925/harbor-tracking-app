@@ -6,6 +6,7 @@ datasets/
 
 # model
 runs/
+pretrain-weights/
 
 # dependencies
 node_modules/
