@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { handleImageChange } from '@/utils/handleImageChange'
 import React from 'react'
 
@@ -36,56 +36,41 @@ export default function Home() {
     )
   }
 
+// Fetch detection results every second
+useEffect(() => {
+  const interval = setInterval(() => {
+    fetch("http://localhost:8000/predict/stream")
+      .then((res) => res.json())
+      .then((data) => {
+        setDetectionResult(data.results || [])
+        setLog(JSON.stringify(data.results, null, 2))
+      })
+      .catch((err) => {
+        setLog("Error fetching prediction: " + err.message)
+      })
+  }, 1000)
+  
+  return () => clearInterval(interval)
+}, [])
+
+// Handle image change
   return (
     <main className="font-sans flex flex-col h-screen bg-[#1f2544] text-[#fefefe] overflow-hidden pt-6">
       {/* Header */}
       <header className="flex justify-center items-center shrink-0">
-        <Image src="/logo.svg" alt="Logo" width={100} height={100} />
         <h1 className="text-4xl font-bold text-[#ffd0ec] ml-6 mr-6">Harbor Tracking App</h1>
-        <Image src="/logo.svg" alt="Logo" width={100} height={100} />
       </header>
 
       <div className="flex justify-center items-center h-screen bg-black">
         {/* Body */}
         <div className="flex gap-4 px-4 pb-2 justify-center items-start h-[540px]">
           {/* Upload */}
-          <section className="w-[540px] h-[540px] flex justify-center items-center bg-[#1a1a1a] rounded-xl border border-[#333] order-0">
-            <label
-              htmlFor="image-upload"
-              className="w-[540px] h-[540px] bg-[#1a1a1a] border-1 border-dashed border-[#333] rounded-2xl flex justify-center items-center cursor-pointer overflow-hidden"
-            >
-              {previewURL ? (
-                <Image
-                  src={previewURL}
-                  alt="Uploaded"
-                  width={540}
-                  height={540}
-                  className="object-cover"
-                />
-              ) : (
-                <span className="text-[#777] text-center px-4">Click or drag to upload an image</span>
-              )}
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                onChange={(e) =>
-                  handleImageChange(
-                    e,
-                    setPreviewURL,
-                    setSelectedImage,
-                    setLog,
-                    setDetectionResult,
-                    {
-                      confidence_threshold: confidence,
-                      classes: selectedClasses.length > 0 ? selectedClasses : undefined,
-                      max_det: maxDetections
-                    }
-                  )
-                }
-                className="hidden"
-              />
-            </label>
+          <section className="w-[540px] h-[540px] bg-black rounded-xl overflow-hidden border border-[#333]">
+            <img
+              src="http://localhost:8000/video_feed"
+              alt="Live Stream"
+              className="object-cover w-full h-full"
+            />
           </section>
 
           {/* Center */}
