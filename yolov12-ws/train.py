@@ -5,10 +5,10 @@ from ultralytics import YOLO
 # -----------------------------
 
 # 欲使用的模型權重（.pt）
-MODEL_WEIGHT_PATH = '/ultralytics/pretrain-weights/yolov12s.pt'
+MODEL_WEIGHT_PATH = '/home/yolov12-ws/datasets/yolo12s.pt'
 
 # 資料集配置檔（data.yaml）
-DATA_YAML_PATH = '/home/datasets/harbor-objects.yolov12/data.yaml'
+DATA_YAML_PATH = '/home/yolov12-ws/datasets/nchc.v2i.yolov12/data.yaml'
 
 # 訓練超參數
 EPOCHS = 60

@@ -14,7 +14,7 @@ x-common-settings: &common
 
     # shared files
     - ../yolov12-ws:/home/yolov12-ws
-    - ../pretrain-weights:/ultralytics/pretrain-weights
+    # - ../pretrain-weights:/ultralytics/pretrain-weights
     - ../frontend:/home/frontend
     - ../backend:/home/backend
 

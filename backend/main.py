@@ -5,6 +5,7 @@ from streamer import VideoStreamer
 import cv2
 import time
 import json
+import numpy as np
 from PIL import Image
 from typing import Optional
 from predictor import Predictor  # 假設你已有一個 Predictor 類別
@@ -40,7 +41,7 @@ url = (
 streamer = VideoStreamer(url)
 
 # 初始化辨識器
-predictor = Predictor(model_path="../yolov12-ws/best.pt")
+predictor = Predictor(model_path="/home/yolov12-ws/runs/detect/train/weights/best.pt")
 
 @app.get("/video_feed")
 def video_feed():
@@ -49,6 +50,64 @@ def video_feed():
             frame = streamer.get_frame()
             if frame is None:
                 continue
+            _, jpeg = cv2.imencode(".jpg", frame)
+            yield (b"--frame\r\n"
+                   b"Content-Type: image/jpeg\r\n\r\n" + jpeg.tobytes() + b"\r\n")
+            time.sleep(0.04)  # 約 25fps
+    return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
+
+
+@app.get("/video_feed_with_detection")
+def video_feed_with_detection(
+    confidence_threshold: float = 0.25,
+    max_det: int = 100,
+    classes: Optional[str] = None
+):
+    def gen():
+        while True:
+            frame = streamer.get_frame()
+            if frame is None:
+                continue
+            
+            # 處理類別參數
+            parsed_classes = None
+            if classes:
+                try:
+                    parsed_classes = json.loads(classes)
+                except:
+                    try:
+                        parsed_classes = [int(x.strip()) for x in classes.split(",")]
+                    except:
+                        parsed_classes = None
+
+            # 執行推論並獲取帶有 bounding box 的影像
+            try:
+                img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                from PIL import Image
+                pil_img = Image.fromarray(img_rgb)
+                
+                # 轉換為 bytes 給 predictor
+                img_bytes = cv2.imencode('.jpg', frame)[1].tobytes()
+                
+                # 執行推論並獲取帶有 bounding box 的影像
+                results, plot_image = predictor.predict_image_with_image(
+                    image_bytes=img_bytes,
+                    confidence_threshold=confidence_threshold,
+                    classes=parsed_classes,
+                    max_det=max_det
+                )
+                
+                # 如果有辨識結果影像，使用它；否則使用原始影像
+                if plot_image is not None:
+                    # 將 PIL 影像轉換回 OpenCV 格式
+                    plot_array = cv2.cvtColor(np.array(plot_image), cv2.COLOR_RGB2BGR)
+                    frame = plot_array
+                    
+            except Exception as e:
+                # 如果辨識失敗，使用原始影像
+                print(f"Detection error: {e}")
+                pass
+            
             _, jpeg = cv2.imencode(".jpg", frame)
             yield (b"--frame\r\n"
                    b"Content-Type: image/jpeg\r\n\r\n" + jpeg.tobytes() + b"\r\n")

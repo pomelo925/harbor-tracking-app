@@ -50,13 +50,23 @@ class Predictor:
                     cls_id = int(box.cls[0])
                     label = self.model.names[cls_id]
                     confidence = float(box.conf[0])
+                    
+                    # 取得 bounding box 座標 (x1, y1, x2, y2)
+                    x1, y1, x2, y2 = box.xyxy[0].tolist()
+                    
                     detection_results.append({
                         "label": label, 
                         "confidence": confidence,
-                        "class_id": cls_id
+                        "class_id": cls_id,
+                        "bbox": {
+                            "x1": x1,
+                            "y1": y1,
+                            "x2": x2,
+                            "y2": y2
+                        }
                     })
 
-            # Generate plot image
+            # Generate plot image with bounding boxes
             plot_img = r.plot()  # numpy array (BGR)
             plot_pil = Image.fromarray(plot_img[..., ::-1])  # convert BGR to RGB
 
