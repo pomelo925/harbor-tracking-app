@@ -13,6 +13,6 @@ cd docker
 
 ## 3. startup the container
 echo "[Harbor Tracking App] Launching container ..."
-# docker compose -p app up dev -d
-docker compose -p app up backend -d
-docker compose -p app up frontend -d
+docker compose -p app up dev -d
+# docker compose -p app up backend -d
+# docker compose -p app up frontend -d

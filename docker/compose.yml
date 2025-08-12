@@ -63,7 +63,7 @@ services:
 
   frontend:
     <<: [*common, *gpu]
-    container_name: front'end
+    container_name: frontend
     ports:
       - "3000:3000"
     command: [ "bash", "-c", "cd /home/frontend && npm start"]
