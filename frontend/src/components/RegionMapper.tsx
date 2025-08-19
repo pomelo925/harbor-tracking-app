@@ -43,11 +43,11 @@ export default function RegionMapper({
   handleMouseDown
 }: RegionMapperProps) {
   return (
-    <div className="w-full flex justify-center">
+    <div className="w-full flex justify-center px-4">
       {/* Region Mapper Panel */}
-      <div className="flex gap-6">
+      <div className="flex flex-col xl:flex-row gap-6 max-w-full w-full xl:w-auto">
         {/* Static Image Area */}
-        <section className="w-[1050px] h-[580px] bg-black rounded-xl overflow-hidden border border-[#333] relative">
+        <section className="w-full xl:w-[1050px] h-[400px] sm:h-[500px] xl:h-[580px] bg-black rounded-xl overflow-hidden border border-[#333] relative flex-shrink-0 max-w-[1050px] mx-auto xl:mx-0">
           {staticImage ? (
             <div 
               className="relative w-full h-full cursor-crosshair"
@@ -166,7 +166,7 @@ export default function RegionMapper({
         </section>
 
         {/* Tools Panel */}
-        <div className="w-96 h-[540px] flex flex-col gap-4">
+        <div className="w-full xl:w-80 xl:min-w-[320px] xl:max-w-[400px] h-auto xl:h-[540px] flex flex-col gap-4 flex-shrink-0">
           {/* Tools Section */}
           <section className="bg-[#1a1a1a] p-4 rounded-xl border border-[#333] flex flex-col">
             <h2 className="text-lg font-semibold text-[#00ffff] mb-4 text-center">Tools</h2>
@@ -222,9 +222,9 @@ export default function RegionMapper({
           </section>
 
           {/* Regions List */}
-          <section className="bg-[#1a1a1a] p-4 rounded-xl border border-[#333] flex-grow flex flex-col min-h-0">
+          <section className="bg-[#1a1a1a] p-4 rounded-xl border border-[#333] flex-grow flex flex-col min-h-0 xl:min-h-[300px] h-auto xl:h-auto">
             <h2 className="text-lg font-semibold text-[#00ffff] mb-4 text-center">Regions</h2>
-            <div className="flex-1 overflow-y-auto space-y-2">
+            <div className="flex-1 overflow-y-auto space-y-2 max-h-[300px] xl:max-h-none">
               {regions.length === 0 ? (
                 <p className="text-[#888] text-sm text-center">No regions created yet</p>
               ) : (
