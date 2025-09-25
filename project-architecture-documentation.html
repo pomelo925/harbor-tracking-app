@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harbor Tracking App - 專案架構與技術文檔</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1f2544 0%, #474e68 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.8;
+            font-size: 1.1rem;
+        }
+        
+        .nav {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        
+        .nav a {
+            text-decoration: none;
+            color: #495057;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav a:hover {
+            color: #007bff;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .section {
+            margin-bottom: 3rem;
+        }
+        
+        .section h2 {
+            color: #1f2544;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+        
+        .section h3 {
+            color: #474e68;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+        
+        .section h4 {
+            color: #6c757d;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+        
+        .architecture-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .architecture-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .architecture-card h4 {
+            color: #007bff;
+            margin-top: 0;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5rem;
+        }
+        
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .tech-badge {
+            background: #007bff;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .highlight strong {
+            color: #856404;
+        }
+        
+        .api-endpoint {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .api-method {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        
+        .file-tree {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            background: #1f2544;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .optimization-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .optimization-list li {
+            background: #e8f5e8;
+            border-left: 4px solid #28a745;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚢 Harbor Tracking App</h1>
+            <p>專案架構與技術文檔 - 2025 Spring NTHU Machine Learning Course Final Project</p>
+        </header>
+        
+        <nav class="nav">
+            <ul>
+                <li><a href="#overview">專案概覽</a></li>
+                <li><a href="#architecture">系統架構</a></li>
+                <li><a href="#backend">後端技術</a></li>
+                <li><a href="#frontend">前端技術</a></li>
+                <li><a href="#ai-model">AI模型</a></li>
+                <li><a href="#deployment">部署配置</a></li>
+                <li><a href="#optimization">技術優化</a></li>
+            </ul>
+        </nav>
+        
+        <main class="content">
+            <!-- 專案概覽 -->
+            <section id="overview" class="section">
+                <h2>📋 專案概覽</h2>
+                
+                <p>Harbor Tracking App 是一個基於 YOLOv12 深度學習模型的港口追蹤系統，能夠即時識別和追蹤港口中的各種物件，包括人員、車輛、船隻、繫船柱和繫船繩等。此專案採用現代化的前後端分離架構，結合了先進的計算機視覺技術與直觀的用戶介面設計。</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">5</span>
+                        <div>檢測類別</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">30K+</span>
+                        <div>訓練樣本</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">25</span>
+                        <div>FPS 即時處理</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">Docker</span>
+                        <div>容器化部署</div>
+                    </div>
+                </div>
+                
+                <h3>🎯 核心功能</h3>
+                <ul>
+                    <li><strong>即時物件檢測</strong>：支援攝影機串流的即時物件識別</li>
+                    <li><strong>區域監控</strong>：自定義監控區域，觸發式截圖和警報</li>
+                    <li><strong>多類別識別</strong>：人員、車輛、船隻、繫船柱、繫船繩五大類別</li>
+                    <li><strong>參數調節</strong>：可調節信心度閾值、最大檢測數量等參數</li>
+                    <li><strong>歷史記錄</strong>：保存檢測結果和截圖記錄</li>
+                </ul>
+                
+                <h3>🔧 技術特色</h3>
+                <ul>
+                    <li>基於最新的 YOLOv12 模型架構</li>
+                    <li>採用 Docker 容器化技術，支援 GPU 加速</li>
+                    <li>前後端分離設計，RESTful API 架構</li>
+                    <li>響應式網頁設計，支援多種顯示模式</li>
+                    <li>自動化數據集合併和處理流程</li>
+                </ul>
+            </section>
+            
+            <!-- 系統架構 -->
+            <section id="architecture" class="section">
+                <h2>🏗️ 系統架構</h2>
+                
+                <div class="architecture-grid">
+                    <div class="architecture-card">
+                        <h4>🖥️ 前端層 (Frontend)</h4>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Next.js 15</span>
+                            <span class="tech-badge">React 19</span>
+                            <span class="tech-badge">TypeScript</span>
+                            <span class="tech-badge">Tailwind CSS 4</span>
+                        </div>
+                        <p>負責用戶介面展示、即時影像串流顯示、參數設定和結果視覺化。採用現代化的 React Hooks 模式，提供流暢的用戶體驗。</p>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>⚙️ 後端層 (Backend)</h4>
+                        <div class="tech-stack">
+                            <span class="tech-badge">FastAPI</span>
+                            <span class="tech-badge">Python 3.10</span>
+                            <span class="tech-badge">Uvicorn</span>
+                            <span class="tech-badge">OpenCV</span>
+                        </div>
+                        <p>提供 RESTful API 服務、處理影像串流、執行 AI 推論，並管理檢測結果的回傳和處理。</p>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>🤖 AI 模型層</h4>
+                        <div class="tech-stack">
+                            <span class="tech-badge">YOLOv12</span>
+                            <span class="tech-badge">Ultralytics</span>
+                            <span class="tech-badge">PyTorch</span>
+                            <span class="tech-badge">CUDA 12.8</span>
+                        </div>
+                        <p>基於 YOLOv12 的物件檢測模型，支援 GPU 加速推論，能夠識別港口環境中的多種物件類別。</p>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>📦 部署層</h4>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Docker</span>
+                            <span class="tech-badge">Docker Compose</span>
+                            <span class="tech-badge">NVIDIA Container</span>
+                            <span class="tech-badge">Ubuntu 22.04</span>
+                        </div>
+                        <p>容器化部署環境，支援 GPU 直通，確保跨平台一致性和便於擴展。</p>
+                    </div>
+                </div>
+                
+                <h3>📁 專案結構</h3>
+                <div class="file-tree">
+harbor-tracking-app/
+├── 📁 backend/                 # 後端 API 服務
+│   ├── main.py                # FastAPI 主程式
+│   ├── predictor.py           # YOLO 預測器
+│   └── streamer.py            # 影像串流處理
+├── 📁 frontend/               # Next.js 前端應用
+│   ├── src/
+│   │   ├── app/              # App Router 頁面
+│   │   ├── components/       # React 組件
+│   │   ├── hooks/            # 自定義 Hooks
+│   │   ├── types/            # TypeScript 類型定義
+│   │   └── utils/            # 工具函數
+│   └── package.json
+├── 📁 docker/                # 容器化配置
+│   ├── Dockerfile            # 多階段構建配置
+│   └── compose.yml           # Docker Compose 服務定義
+├── 📁 yolov12-ws/            # AI 模型訓練工作區
+│   ├── train.py              # 模型訓練腳本
+│   ├── merge.sh              # 數據集合併腳本
+│   ├── datasets/             # 訓練數據集
+│   └── runs/                 # 訓練結果
+├── 📁 pretrain-weights/      # 預訓練模型權重
+└── run.sh                    # 一鍵啟動腳本
+                </div>
+            </section>
+            
+            <!-- 後端技術 -->
+            <section id="backend" class="section">
+                <h2>🔧 後端技術架構</h2>
+                
+                <h3>FastAPI 服務架構</h3>
+                <p>後端採用 FastAPI 框架構建，提供高效能的異步 API 服務。主要包含三個核心模組：</p>
+                
+                <h4>1. 主服務模組 (main.py)</h4>
+                <div class="code-block">
+                    <pre>
+# 核心 API 端點
+app = FastAPI()
+
+# CORS 中介層配置
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+                    </pre>
+                </div>
+                
+                <div class="highlight">
+                    <strong>技術亮點：</strong> 使用 FastAPI 的自動 API 文档生成功能，支援 OpenAPI 規範，提供互動式 API 測試介面。
+                </div>
+                
+                <h4>📡 API 端點設計</h4>
+                
+                <div class="api-endpoint">
+                    <div class="api-method">GET</div>
+                    <strong>/video_feed</strong>
+                    <p>提供原始攝影機串流，使用 multipart/x-mixed-replace 格式實現即時影像傳輸。</p>
+                </div>
+                
+                <div class="api-endpoint">
+                    <div class="api-method">GET</div>
+                    <strong>/video_feed_with_detection</strong>
+                    <p>提供帶有檢測框的影像串流，支援參數：confidence_threshold、max_det、classes。</p>
+                </div>
+                
+                <div class="api-endpoint">
+                    <div class="api-method">GET</div>
+                    <strong>/predict/stream</strong>
+                    <p>返回當前幀的檢測結果 JSON 數據，用於前端即時顯示統計資訊。</p>
+                </div>
+                
+                <h4>2. 預測器模組 (predictor.py)</h4>
+                <div class="code-block">
+                    <pre>
+class Predictor:
+    def __init__(self, model_path: str):
+        self.model = YOLO(model_path)
+     
+    def predict_image_with_image(
+        self, 
+        image_bytes: bytes,
+        confidence_threshold: float = 0.25,
+        classes: Optional[List[int]] = None,
+        max_det: int = 300
+    ) -> Tuple[List[Dict[str, Any]], Optional[Image.Image]]:
+        # YOLO 推論執行
+        results = self.model(
+            img,
+            conf=confidence_threshold,
+            classes=classes,
+            max_det=max_det
+        )
+                    </pre>
+                </div>
+                
+                <div class="highlight">
+                    <strong>優化策略：</strong> 
+                    <ul>
+                        <li>使用 Ultralytics YOLO 的原生 API，確保最佳性能</li>
+                        <li>支援動態參數調整，無需重新載入模型</li>
+                        <li>同時返回檢測結果和視覺化圖像，提升效率</li>
+                    </ul>
+                </div>
+                
+                <h4>3. 串流處理模組 (streamer.py)</h4>
+                <div class="code-block">
+                    <pre>
+class VideoStreamer:
+    def __init__(self, stream_url: str):
+        self.cap = cv2.VideoCapture(stream_url)
+        self.latest_frame = None
+        self.running = True
+        
+        # 背景執行緒持續擷取畫面
+        self.thread = threading.Thread(target=self.update_frame, daemon=True)
+        self.thread.start()
+
+    def update_frame(self):
+        while self.running and self.cap.isOpened():
+            ret, frame = self.cap.read()
+            if ret:
+                self.latest_frame = frame
+                    </pre>
+                </div>
+                
+                <div class="highlight">
+                    <strong>技術創新：</strong> 使用多執行緒架構避免影像擷取阻塞，確保 25 FPS 的流暢播放體驗。
+                </div>
+            </section>
+            
+            <!-- 前端技術 -->
+            <section id="frontend" class="section">
+                <h2>🎨 前端技術架構</h2>
+                
+                <h3>Next.js 15 App Router 架構</h3>
+                <p>前端採用最新的 Next.js 15 和 React 19，使用 App Router 模式，提供現代化的開發體驗和優異的性能。</p>
+                
+                <h4>🎯 核心技術棧</h4>
+                <div class="tech-stack">
+                    <span class="tech-badge">Next.js 15.4.4</span>
+                    <span class="tech-badge">React 19</span>
+                    <span class="tech-badge">TypeScript 5</span>
+                    <span class="tech-badge">Tailwind CSS 4</span>
+                </div>
+                
+                <h4>📱 組件架構設計</h4>
+                
+                <div class="architecture-grid">
+                    <div class="architecture-card">
+                        <h4>LiveStream 組件</h4>
+                        <p>負責即時影像顯示和檢測結果覆蓋，支援區域標註和檢測框顯示。</p>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>Settings 組件</h4>
+                        <p>提供參數調節介面，包括信心度閾值、最大檢測數、類別篩選等設定。</p>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>RegionMapper 組件</h4>
+                        <p>區域標註工具，支援多邊形區域繪製和編輯功能。</p>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>RegionMonitor 組件</h4>
+                        <p>區域監控面板，顯示各區域的檢測統計和觸發記錄。</p>
+                    </div>
+                </div>
+                
+                <h4>🎣 自定義 Hooks 設計</h4>
+                
+                <div class="code-block">
+                    <pre>
+// useDetection Hook - 檢測狀態管理
+export function useDetection() {
+  const [confidence, setConfidence] = useState(0.5)
+  const [maxDetections, setMaxDetections] = useState(100)
+  const [selectedClasses, setSelectedClasses] = useState&lt;number[]&gt;([])
+  const [detectionResult, setDetectionResult] = useState&lt;DetectionItem[]&gt;([])
+  
+  // 每秒獲取檢測結果
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch("http://localhost:8000/predict/stream")
+        .then((res) => res.json())
+        .then((data) => {
+          setDetectionResult(data.results || [])
+        })
+    }, 1000)
+    
+    return () => clearInterval(interval)
+  }, [])
+  
+  return {
+    confidence,
+    setConfidence,
+    maxDetections,
+    setMaxDetections,
+    selectedClasses,
+    detectionResult,
+    handleClassToggle
+  }
+}
+                    </pre>
+                </div>
+                
+                <div class="highlight">
+                    <strong>架構優勢：</strong>
+                    <ul>
+                        <li><strong>狀態分離</strong>：使用自定義 Hooks 將業務邏輯從組件中抽離</li>
+                        <li><strong>類型安全</strong>：完整的 TypeScript 類型定義，減少執行時錯誤</li>
+                        <li><strong>響應式設計</strong>：使用 Tailwind CSS 實現適應性佈局</li>
+                        <li><strong>性能優化</strong>：合理使用 useEffect 和 useState，避免不必要的重新渲染</li>
+                    </ul>
+                </div>
+                
+                <h4>🎨 UI/UX 設計特色</h4>
+                <ul>
+                    <li><strong>深色主題</strong>：符合監控系統的視覺需求，減少眼部疲勞</li>
+                    <li><strong>即時反饋</strong>：檢測結果即時更新，提供流暢的互動體驗</li>
+                    <li><strong>直觀操作</strong>：拖拉式參數調節，點擊式類別篩選</li>
+                    <li><strong>資訊豐富</strong>：多層次的資訊展示，從概覽到詳細數據</li>
+                </ul>
+            </section>
+            
+            <!-- AI 模型 -->
+            <section id="ai-model" class="section">
+                <h2>🤖 AI 模型與訓練</h2>
+                
+                <h3>YOLOv12 模型架構</h3>
+                <p>本專案採用最新的 YOLOv12 模型進行物件檢測，相較於前代版本在精度和速度上都有顯著提升。</p>
+                
+                <h4>📊 模型規格</h4>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">YOLOv12s</span>
+                        <div>模型版本</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">640×640</span>
+                        <div>輸入解析度</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">60</span>
+                        <div>訓練週期</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">16</span>
+                        <div>批次大小</div>
+                    </div>
+                </div>
+                
+                <h4>🎯 檢測類別與數據集</h4>
+                <p>經過精心策劃的數據集合併流程，整合多個 Roboflow 數據集：</p>
+                
+                <div class="architecture-grid">
+                    <div class="architecture-card">
+                        <h4>👤 Human（人員）</h4>
+                        <p><strong>4,093 個實例</strong></p>
+                        <ul>
+                            <li>Person Detection (3K samples)</li>
+                            <li>Human Detection (1.6K samples)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>🚗 Vehicle（車輛）</h4>
+                        <p><strong>15,017 個實例</strong></p>
+                        <ul>
+                            <li>Cars Dataset (4.4K samples)</li>
+                            <li>Bus Dataset (1K samples)</li>
+                            <li>Truck Dataset (1K samples)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>🚢 Vessel（船隻）</h4>
+                        <p><strong>8,798 個實例</strong></p>
+                        <ul>
+                            <li>Boat Detection datasets</li>
+                            <li>Ship and vessel collections</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>🪨 Bollard（繫船柱）</h4>
+                        <p><strong>1,795 個實例</strong></p>
+                        <ul>
+                            <li>港口設施專用數據集</li>
+                            <li>自收集標註數據</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h4>⚙️ 訓練超參數配置</h4>
+                <div class="code-block">
+                    <pre>
+# 訓練配置
+EPOCHS = 60
+BATCH_SIZE = 16
+IMAGE_SIZE = 640
+SCALE = 0.9         # 尺度變換
+MOSAIC = 1.0        # 馬賽克增強
+MIXUP = 0.05        # 混合增強
+COPY_PASTE = 0.15   # 複製貼上增強
+DEVICE = "0"        # GPU 設備
+
+# 模型訓練
+results = model.train(
+    data=DATA_YAML_PATH,
+    epochs=EPOCHS,
+    batch=BATCH_SIZE,
+    imgsz=IMAGE_SIZE,
+    scale=SCALE,
+    mosaic=MOSAIC,
+    mixup=MIXUP,
+    copy_paste=COPY_PASTE,
+    device=DEVICE,
+)
+                    </pre>
+                </div>
+                
+                <h4>🔄 自動化數據集合併</h4>
+                <p>開發了智能化的數據集合併腳本 (merge.sh)，解決 Roboflow 免費版本的限制：</p>
+                
+                <div class="highlight">
+                    <strong>合併流程創新：</strong>
+                    <ul>
+                        <li><strong>多專案整合</strong>：從多個 Roboflow 專案fork數據集</li>
+                        <li><strong>類別重新映射</strong>：統一不同數據集的類別標籤</li>
+                        <li><strong>品質檢查</strong>：自動過濾分割格式和無效標註</li>
+                        <li><strong>統計報告</strong>：生成詳細的合併統計資訊</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <!-- 部署配置 -->
+            <section id="deployment" class="section">
+                <h2>🐳 部署配置與容器化</h2>
+                
+                <h3>多階段 Docker 構建</h3>
+                <p>採用多階段 Docker 構建策略，優化鏡像大小和安全性：</p>
+                
+                <div class="code-block">
+                    <pre>
+# 基礎階段 - CUDA 12.8 + Python 3.10
+FROM pytorch/pytorch:2.7.0-cuda12.8-cudnn9-runtime AS base
+
+# 用戶設置階段 - 非 root 用戶
+FROM base AS user-setup
+ARG USER_UID=1000
+ARG USER_GID=1000
+ARG USERNAME=appuser
+
+# Ultralytics 階段 - YOLOv12 環境
+FROM user-setup AS ultralytics
+RUN pip install ultralytics
+
+# Next.js 階段 - 前端環境
+FROM ultralytics AS nextjs
+RUN npm i -g npm@11.4.1 yarn
+
+# 最終階段 - 生產環境
+FROM nextjs AS release
+WORKDIR /home/yolov12-ws
+USER appuser
+                    </pre>
+                </div>
+                
+                <h4>🔧 Docker Compose 服務編排</h4>
+                
+                <div class="architecture-grid">
+                    <div class="architecture-card">
+                        <h4>Backend Service</h4>
+                        <div class="code-block">
+                            <pre>
+backend:
+  container_name: backend
+  ports:
+    - "8000:8000"
+  command: [ "bash", "-c", 
+    "cd /home/backend && 
+     uvicorn main:app --reload 
+     --host 0.0.0.0 --port 8000"]
+                            </pre>
+                        </div>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>Frontend Service</h4>
+                        <div class="code-block">
+                            <pre>
+frontend:
+  container_name: frontend
+  ports:
+    - "3000:3000"
+  command: [ "bash", "-c", 
+    "cd /home/frontend && 
+     npm start"]
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <h4>🚀 一鍵啟動腳本</h4>
+                <div class="code-block">
+                    <pre>
+#!/bin/bash
+echo "=== [Harbor Tracking App] Run ==="
+
+# 清理現有容器
+docker compose -p app down --volumes --remove-orphans
+
+# 環境設置
+export COMPOSE_BAKE=true
+export DISPLAY=localhost:0.0
+
+# X11 轉發設置（GUI 支援）
+xhost +local:docker
+cd docker
+
+# 啟動服務
+docker compose -p app up backend -d
+docker compose -p app up frontend -d
+                    </pre>
+                </div>
+                
+                <h4>🖥️ GPU 支援配置</h4>
+                <div class="highlight">
+                    <strong>NVIDIA Container 整合：</strong>
+                    <ul>
+                        <li><strong>GPU 直通</strong>：完整的 CUDA 12.8 支援</li>
+                        <li><strong>多卡支援</strong>：count: all 配置支援多張顯卡</li>
+                        <li><strong>容器權限</strong>：privileged 模式確保硬件訪問</li>
+                        <li><strong>X11 轉發</strong>：支援 GUI 應用程式顯示</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <!-- 技術優化 -->
+            <section id="optimization" class="section">
+                <h2>⚡ 技術優化與創新</h2>
+                
+                <h3>🔄 性能優化策略</h3>
+                
+                <ul class="optimization-list">
+                    <li>
+                        <strong>多執行緒影像處理</strong><br>
+                        使用獨立執行緒持續擷取攝影機畫面，避免阻塞主程序，確保 25 FPS 的流暢體驗。
+                    </li>
+                    
+                    <li>
+                        <strong>智能緩存機制</strong><br>
+                        在 VideoStreamer 中實現 latest_frame 緩存，減少重複的影像讀取操作。
+                    </li>
+                    
+                    <li>
+                        <strong>異步 API 設計</strong><br>
+                        FastAPI 的原生異步支援，配合 StreamingResponse 實現高效的即時串流傳輸。
+                    </li>
+                    
+                    <li>
+                        <strong>前端狀態優化</strong><br>
+                        使用 React Hooks 模式進行狀態管理，避免不必要的組件重新渲染。
+                    </li>
+                    
+                    <li>
+                        <strong>GPU 記憶體管理</strong><br>
+                        YOLO 模型只載入一次，支援動態參數調整，避免重複初始化的開銷。
+                    </li>
+                </ul>
+                
+                <h3>🛡️ 系統安全與穩定性</h3>
+                
+                <div class="architecture-grid">
+                    <div class="architecture-card">
+                        <h4>容器安全</h4>
+                        <ul>
+                            <li>非 root 用戶執行</li>
+                            <li>最小權限原則</li>
+                            <li>安全的環境變數管理</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>錯誤處理</h4>
+                        <ul>
+                            <li>完整的異常捕獲機制</li>
+                            <li>優雅的降級處理</li>
+                            <li>詳細的錯誤日誌記錄</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>資源管理</h4>
+                        <ul>
+                            <li>記憶體使用監控</li>
+                            <li>GPU 資源合理分配</li>
+                            <li>自動垃圾回收機制</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="architecture-card">
+                        <h4>監控診斷</h4>
+                        <ul>
+                            <li>即時性能指標</li>
+                            <li>API 回應時間監控</li>
+                            <li>系統健康狀態檢查</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h3>🔮 技術創新亮點</h3>
+                
+                <div class="highlight">
+                    <strong>1. 自適應串流品質：</strong> 根據網路狀況和系統負載自動調整影像品質和幀率。
+                </div>
+                
+                <div class="highlight">
+                    <strong>2. 智能區域監控：</strong> 支援自定義多邊形監控區域，結合物件檢測實現精準的觸發機制。
+                </div>
+                
+                <div class="highlight">
+                    <strong>3. 動態模型參數：</strong> 無需重啟服務即可調整檢測參數，提供彈性的使用體驗。
+                </div>
+                
+                <div class="highlight">
+                    <strong>4. 多模態數據融合：</strong> 整合多個數據源的標註格式，建立統一的檢測標準。
+                </div>
+                
+                <h3>📈 擴展性設計</h3>
+                <ul>
+                    <li><strong>微服務架構</strong>：前後端完全分離，便於獨立擴展和部署</li>
+                    <li><strong>API 標準化</strong>：RESTful 設計，易於整合第三方系統</li>
+                    <li><strong>模組化組件</strong>：前端組件高度復用，支援快速功能擴展</li>
+                    <li><strong>容器化部署</strong>：支援 Kubernetes 編排，具備生產級擴展能力</li>
+                </ul>
+            </section>
+        </main>
+        
+        <footer class="footer">
+            <p>© 2025 Harbor Tracking App - NTHU Machine Learning Course Final Project</p>
+            <p>作者：Hsing-Yu Huang | 技術棧：YOLOv12 + FastAPI + Next.js + Docker</p>
+            <p>Generated on: 2025-09-25</p>
+        </footer>
+    </div>
+</body>
+</html>
